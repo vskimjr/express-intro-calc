@@ -1,11 +1,14 @@
+"use strict";
+
 /** Simple demo Express app. */
 
 const express = require("express");
 const app = express();
 const { findMean, findMedian, findMode } = require("./stats");
+const { convertStrNums } = require("./utils");
 
 // useful error class to throw
-const { NotFoundError } = require("./expressError");
+const { NotFoundError, BadRequestError } = require("./expressError");
 
 const MISSING = "Expected key `nums` with comma-separated list of numbers.";
 
@@ -13,35 +16,68 @@ const MISSING = "Expected key `nums` with comma-separated list of numbers.";
 app.use(express.json());
 
 
-
 /** Finds mean of nums in qs: returns {operation: "mean", result } */
+
 app.get("/mean", function (req, res) {
-  let numArr = (req.query.nums).split(",").map(s => Number(s));
 
-  console.log(numArr);
-  const result = findMean(numArr);
+  const strNums = req.query.nums
+  if (strNums === undefined) {
+    throw new BadRequestError(MISSING);
+  }
 
-  return res.json({response: {
-    operation: "mean",
-    value: result
-  }});
+  const nums = convertStrNums(strNums);
+
+  const result = findMean(nums);
+
+  return res.json({
+    response: {
+      operation: "mean",
+      value: result
+    }
+  });
+
 });
-
-/*
-response: {
-  operation: "mean",
-  value: 4,
-} */
 
 /** Finds median of nums in qs: returns {operation: "median", result } */
+
 app.get("/median", function (req, res) {
 
+  const strNums = req.query.nums
+  if (strNums === undefined) {
+    throw new BadRequestError(MISSING);
+  }
+
+  const nums = convertStrNums(strNums);
+
+  const result = findMedian(nums);
+
+  return res.json({
+    response: {
+      operation: "median",
+      value: result
+    }
+  });
+
 });
-
-
 
 /** Finds mode of nums in qs: returns {operation: "mean", result } */
 app.get("/mode", function (req, res) {
+
+  const strNums = req.query.nums
+  if (strNums === undefined) {
+    throw new BadRequestError(MISSING);
+  }
+
+  const nums = convertStrNums(strNums);
+
+  const result = findMode(nums);
+
+  return res.json({
+    response: {
+      operation: "mode",
+      value: result
+    }
+  });
 
 });
 
